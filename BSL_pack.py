@@ -94,7 +94,7 @@ class BSL_Pack:
                     bytes_buf = bytes.fromhex(linel)
                     send_count += len(bytes_buf)
                     address_count += len(bytes_buf)
-                    if send_count > 128:
+                    if send_count > 16:
                         address_count1 = address_count - len(bytes_buf)
                         #                    print(hex(address_count1))
                         #                    print(line)

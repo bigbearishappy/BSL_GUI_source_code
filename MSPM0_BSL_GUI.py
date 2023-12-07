@@ -5,6 +5,7 @@ import platform
 from get_file import *
 from BSL_pack import *
 from UART_send import *
+from I2C_send import *
 import time
 import os
 from txt_to_h import *
@@ -212,107 +213,120 @@ class Tkinter_app:
     def download(self):
         self.textlog.config(state=NORMAL)
         if self.passwordfile != b"" and self.firmwaredfile != "":
-            if self.xds_v.get() == "a":
-                os.system(
-                    self.path
-                    + "/common/uscif/dbgjtag.exe  -f @xds110 -Y gpiopins, config=0x1, write=0x1"
-                )
-                os.system(self.path + "/common/uscif/xds110/xds110reset.exe -d 1400")
-                # if self.xds_r.get() == '2':
-                #     os.system(self.path + "/common/uscif/xds110/xds110reset.exe -d 1300")
-                # else:
-                #     os.system(self.path + "/common/uscif/xds110/xds110reset.exe")
-            else:
-                if self.xds_v.get() == "b":
-                    os.system(
-                        self.path
-                        + "/common/uscif/dbgjtag.exe -f @xds110 -Y power,supply=on,voltage=3.2"
-                    )
-                    os.system(
-                        self.path
-                        + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x02"
-                    )
-                    time.sleep(1.4)
-                    os.system(
-                        self.path
-                        + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x03"
-                    )
-                    # if self.xds_r.get() == '2':
-                    #     os.system(
-                    #         self.path + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x02")
-                    #     time.sleep(1.3)
-                    #     os.system(
-                    #         self.path + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x03")
-                    # else:
-                    #     os.system(
-                    #         self.path + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x02")
-                    #     time.sleep(0.1)
-                    #     os.system(
-                    #         self.path + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x03")
-                else:
-                    # print(self.xds_v.get())
-                    self.textlog.insert(
-                        INSERT, "No correct hardware bridge selected.\n", "error"
-                    )
-            find_flag = UART_S.find_MSP_COM()
-            if find_flag:
-                self.textlog.insert(
-                    INSERT, "Find MSP COM port:" + find_flag + "\n", "normal"
-                )
-                ser_port = UART_S.config_uart(find_flag)
-                self.textlog.insert(
-                    INSERT,
-                    "Configure UART: 9600 baudrate, 8 data bits (LSB first), no parity, and 1 stop bit.\n",
-                    "normal",
-                )
-                UART_S.send_data(ser_port, self.connection_pack)
-                response_ = UART_S.read_data(ser_port, 1)
-                if self.xds_v.get() == "a":
-                    os.system(
-                        self.path
-                        + "/common/uscif/dbgjtag.exe  -f @xds110 -Y gpiopins, config=0x1, write=0x0"
-                    )
-                else:
-                    if self.xds_v.get() == "b":
-                        os.system(
-                            self.path
-                            + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x01"
-                        )
-                # print(type(response))
-                # print(response)
-                UART_S.send_data(ser_port, b"\xbb")
-                response01 = UART_S.read_data(ser_port, 1)
-                #                print(response)
+            #if self.xds_v.get() == "a":
+            #    os.system(
+            #        self.path
+            #        + "/common/uscif/dbgjtag.exe  -f @xds110 -Y gpiopins, config=0x1, write=0x1"
+            #    )
+            #    os.system(self.path + "/common/uscif/xds110/xds110reset.exe -d 1400")
+            #    # if self.xds_r.get() == '2':
+            #    #     os.system(self.path + "/common/uscif/xds110/xds110reset.exe -d 1300")
+            #    # else:
+            #    #     os.system(self.path + "/common/uscif/xds110/xds110reset.exe")
+            #else:
+            #    if self.xds_v.get() == "b":
+            #        os.system(
+            #            self.path
+            #            + "/common/uscif/dbgjtag.exe -f @xds110 -Y power,supply=on,voltage=3.2"
+            #        )
+            #        os.system(
+            #            self.path
+            #            + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x02"
+            #        )
+            #        time.sleep(1.4)
+            #        os.system(
+            #            self.path
+            #            + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x03"
+            #        )
+            #        # if self.xds_r.get() == '2':
+            #        #     os.system(
+            #        #         self.path + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x02")
+            #        #     time.sleep(1.3)
+            #        #     os.system(
+            #        #         self.path + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x03")
+            #        # else:
+            #        #     os.system(
+            #        #         self.path + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x02")
+            #        #     time.sleep(0.1)
+            #        #     os.system(
+            #        #         self.path + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x03")
+            #    else:
+            #        # print(self.xds_v.get())
+            #        self.textlog.insert(
+            #            INSERT, "No correct hardware bridge selected.\n", "error"
+            #        )
+            #find_flag = UART_S.find_MSP_COM()
+            if 1:
+                # self.textlog.insert(
+                #     INSERT, "Find MSP COM port:" + find_flag + "\n", "normal"
+                # )
+                # ser_port = UART_S.config_uart(find_flag)
+                # self.textlog.insert(
+                #     INSERT,
+                #     "Configure UART: 9600 baudrate, 8 data bits (LSB first), no parity, and 1 stop bit.\n",
+                #     "normal",
+                # )
+                #UART_S.send_data(ser_port, self.connection_pack)
+                #response_ = UART_S.read_data(ser_port, 1)
+                #I2C_S.send_data(self.connection_pack[0], self.connection_pack[1:])
+                I2C_S.send_data(list(self.connection_pack)[0], list(self.connection_pack)[1:])
+                response_ = I2C_S.read_data(0, 1)
+                #if self.xds_v.get() == "a":
+                #    os.system(
+                #        self.path
+                #        + "/common/uscif/dbgjtag.exe  -f @xds110 -Y gpiopins, config=0x1, write=0x0"
+                #    )
+                #else:
+                #    if self.xds_v.get() == "b":
+                #        os.system(
+                #            self.path
+                #            + "/common/uscif/dbgjtag.exe -f @xds110 -Y gpiopins, config=0x3, write=0x01"
+                #        )
+                #UART_S.send_data(ser_port, b"\xbb")
+                #response01 = UART_S.read_data(ser_port, 1)
+                I2C_S.send_data(0, [0xbb])
+                response01 = I2C_S.read_data(0, 1)
                 if response01 == "51":
                     self.textlog.insert(
                         INSERT, "MSPM0 is in BSL mode.\nGet device ID...\n", "normal"
                     )
-                    UART_S.send_data(ser_port, self.get_ID_pack)
-                    response1 = UART_S.read_data(ser_port, 33)
+                    #UART_S.send_data(ser_port, self.get_ID_pack)
+                    #response1 = UART_S.read_data(ser_port, 33)
+                    I2C_S.send_data(list(self.get_ID_pack)[0], list(self.get_ID_pack)[1:])
+                    response1 = I2C_S.read_data(0, 33)
                     self.textlog.insert(INSERT, "Send the password...\n", "normal")
-                    UART_S.send_data(ser_port, self.password_pack)
-                    response2 = UART_S.read_data(ser_port, 1)
+                    #UART_S.send_data(ser_port, self.password_pack)
+                    #response2 = UART_S.read_data(ser_port, 1)
+                    I2C_S.send_data(list(self.password_pack)[0], list(self.password_pack)[1:])
+                    response2 = I2C_S.read_data(0, 1)
                     check = self.check_pack(response2)
                     if check:
-                        response2 = UART_S.read_data(ser_port, 9)
+                        #response2 = UART_S.read_data(ser_port, 9)
+                        response2 = I2C_S.read_data(0, 9)
                         check2 = self.check_reponse(response2[8:10])
                         # print(response2[8:10])
                         if check2:
                             self.textlog.insert(INSERT, "Mass erase...\n", "normal")
-                            UART_S.send_data(ser_port, self.mass_erase_pack)
-                            response2 = UART_S.read_data(ser_port, 1)
-                            response2 = UART_S.read_data(ser_port, 9)
+                            #UART_S.send_data(ser_port, self.mass_erase_pack)
+                            #response2 = UART_S.read_data(ser_port, 1)
+                            #response2 = UART_S.read_data(ser_port, 9)
+                            I2C_S.send_data(list(self.mass_erase_pack)[0], list(self.mass_erase_pack)[1:])
+                            response2 = I2C_S.read_data(0, 1)
+                            response2 = I2C_S.read_data(0, 9)
                             self.textlog.insert(
                                 INSERT, "Send the firmware...\n", "normal"
                             )
                             # print(type(firmware_pack))
                             # print(firmware_pack)
                             for list_code in self.firmware_pack:
-                                UART_S.send_data(ser_port, list_code)
-                                response3 = UART_S.read_data(ser_port, 1)
+                                #UART_S.send_data(ser_port, list_code)
+                                #response3 = UART_S.read_data(ser_port, 1)
+                                I2C_S.send_data(list(list_code)[0], list(list_code)[1:])
+                                response3 = I2C_S.read_data(0, 1)
                                 check = self.check_pack(response3)
                                 if check:
-                                    response3 = UART_S.read_data(ser_port, 9)
+                                    #response3 = UART_S.read_data(ser_port, 9)
+                                    response3 = I2C_S.read_data(0, 9)
                                     check3 = self.check_reponse(response3[8:10])
                                     if check3:
                                         pass
@@ -334,8 +348,10 @@ class Tkinter_app:
                                     "-----------Download finished!----------\n",
                                     "pass",
                                 )
-                                UART_S.send_data(ser_port, self.start_app_pack)
-                                response3 = UART_S.read_data(ser_port, 1)
+                                #UART_S.send_data(ser_port, self.start_app_pack)
+                                #response3 = UART_S.read_data(ser_port, 1)
+                                I2C_S.send_data(list(self.start_app_pack)[0], list(self.start_app_pack)[1:])
+                                response3 = I2C_S.read_data(0, 1)
                     else:
                         self.textlog.insert(INSERT, "Error: No response！\n", "error")
                 else:
@@ -552,7 +568,8 @@ class Tkinter_app:
 if __name__ == "__main__":
     file_d = Get_files()
     BSL_pack = BSL_Pack()
-    UART_S = UART_send()
+    #UART_S = UART_send()
+    I2C_S = I2C_send(0x48)
     Conver_F = TXT_to_h()
     root = Tk()
     #root.iconbitmap("imag/Capture.ico")
