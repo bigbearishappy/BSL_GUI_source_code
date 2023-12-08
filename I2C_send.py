@@ -4,9 +4,12 @@ import struct
 import time
 
 class I2C_send:
-    def __init__(self, device_address):
+    def __init__(self):
+        pass
+
+    def config_i2c(self, device_address, i2c_channel):
         self.device_address = device_address
-        self.bus = smbus.SMBus(1)
+        self.bus = smbus.SMBus(i2c_channel)
 
     def send_data(self, reg_buf, data):
         chunk_size = 32

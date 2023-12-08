@@ -9,6 +9,7 @@ from I2C_send import *
 import time
 import os
 from txt_to_h import *
+from glob import glob
 
 
 class Tkinter_app:
@@ -77,25 +78,33 @@ class Tkinter_app:
         self.button = Button(frame3, text="Download", command=self.download)
         self.button.pack()
 
-        self.label3 = Label(frame3, text="(Download: Just support UART with XDS110)")
-        self.label3.pack()
+        #self.label3 = Label(frame3, text="(Download: Just support UART with XDS110)")
+        #self.label3.pack()
 
         self.rad_button = Radiobutton(
             frame3,
-            text="XDS110 on Launchpad",
+            text="I2C",
             variable=self.xds_v,
             value="a",
             command=self.xds110_LP,
         )
-        self.rad_button.place(relx=0.7, rely=0)
-        self.rad_button2 = Radiobutton(
-            frame3,
-            text="Standalone XDS110",
-            variable=self.xds_v,
-            value="b",
-            command=self.xds110_S,
-        )
-        self.rad_button2.place(relx=0.7, rely=0.5)
+        self.rad_button.place(relx=0.6, rely=0)
+
+        self.selected_port = "default"
+        self.var = StringVar(frame3)
+        self.var.trace_add("write", self.on_dropdown_change)
+        i2c_devices = glob('/dev/i2c-*')
+        self.dropdown_box = OptionMenu(frame3, self.var, *i2c_devices)
+        self.dropdown_box.place(relx=0.7, rely=0)
+
+        #self.rad_button2 = Radiobutton(
+        #    frame3,
+        #    text="Standalone XDS110",
+        #    variable=self.xds_v,
+        #    value="b",
+        #    command=self.xds110_S,
+        #)
+        #self.rad_button2.place(relx=0.7, rely=0.5)
 
         # self.rad_button3 = Radiobutton(frame3, text='BOOTRST', variable=self.xds_r, value='1', command=self.xds110_BR)
         # self.rad_button3.place(relx=0.1,rely=0)
@@ -131,6 +140,10 @@ class Tkinter_app:
         self.firmware_pack = b""
         self.start_app_pack = BSL_pack.start_app_pack()
         self.path = os.getcwd()
+
+    def on_dropdown_change(self, *args):
+        self.selected_port = self.var.get()
+        print(f"select port:{self.var.get()}")
 
     def xds110_LP(self):
         self.textlog.config(state=NORMAL)
@@ -256,7 +269,7 @@ class Tkinter_app:
             #            INSERT, "No correct hardware bridge selected.\n", "error"
             #        )
             #find_flag = UART_S.find_MSP_COM()
-            if 1:
+            if self.selected_port != "default":
                 # self.textlog.insert(
                 #     INSERT, "Find MSP COM port:" + find_flag + "\n", "normal"
                 # )
@@ -269,6 +282,7 @@ class Tkinter_app:
                 #UART_S.send_data(ser_port, self.connection_pack)
                 #response_ = UART_S.read_data(ser_port, 1)
                 #I2C_S.send_data(self.connection_pack[0], self.connection_pack[1:])
+                I2C_S.config_i2c(0x48, int(self.selected_port.split("-")[-1]))
                 I2C_S.send_data(list(self.connection_pack)[0], list(self.connection_pack)[1:])
                 response_ = I2C_S.read_data(0, 1)
                 #if self.xds_v.get() == "a":
@@ -569,7 +583,7 @@ if __name__ == "__main__":
     file_d = Get_files()
     BSL_pack = BSL_Pack()
     #UART_S = UART_send()
-    I2C_S = I2C_send(0x48)
+    I2C_S = I2C_send()
     Conver_F = TXT_to_h()
     root = Tk()
     #root.iconbitmap("imag/Capture.ico")
