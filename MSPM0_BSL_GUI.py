@@ -51,7 +51,7 @@ class Tkinter_app:
         frame2 = Frame(master)
         frame2.pack(side="bottom")
 
-        self.label0 = Label(frame0, text="Application firmware file:")
+        self.label0 = Label(frame0, text="Firmware file:")
         self.label0.pack(side="left")
         global input_name
         input_name = StringVar()
